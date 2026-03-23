@@ -1,0 +1,8 @@
+/build/
+/config/
+/dist/
+/*.js
+/test/unit/coverage/
+/src/components/MarkdownEditor/
+/src/components/RichtextEditor/
+/src/main.js
