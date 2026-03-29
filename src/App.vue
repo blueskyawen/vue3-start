@@ -4,8 +4,8 @@ import HelloWorld from "./components/HelloWorld.vue";
 </script>
 
 <template>
-  <a-layout class="layout">
-    <a-layout-header cl>
+  <a-layout class="layout" style="height: inherit">
+    <a-layout-header>
       <img
         alt="Vue logo"
         class="logo"
@@ -21,13 +21,19 @@ import HelloWorld from "./components/HelloWorld.vue";
     <a-layout-content style="padding: 0 50px">
       <RouterView />
     </a-layout-content>
-    <a-layout-footer style="text-align: center">
-      Ant Design ©2018 Created by Ant UED
+    <a-layout-footer style="text-align: center; padding: 15px 50px;">
+      凌晨 ©2025 Created by Vite
     </a-layout-footer>
   </a-layout>
 </template>
 
 <style scoped>
+.layout :deep(.ant-layout-content) {
+  padding: 0 15px !important;
+}
+.layout :deep(.ant-layout-content > main) {
+  height: 100%;
+}
 .logo {
   display: block;
   margin: 0 auto 2rem;
