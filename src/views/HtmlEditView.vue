@@ -5,5 +5,5 @@
 </template>
 
 <script setup>
-import HtmlEdit from "../components/HtmlEdit/index.vue";
+import HtmlEdit from "../components/htmlEdit/index.vue";
 </script>
