@@ -41,7 +41,48 @@ import { defineComponent } from 'vue'
     },
     methods: {
       runCode() {
-        this.codeConent = `<!DOCTYPE html>
+        var combineCode = '';
+        console.log(this.codeData.html)
+        console.log(this.codeData.css)
+        console.log(this.codeData.javascript)
+        if (this.codeData && this.codeData.html) {
+          combineCode = this.codeData.html
+          if (this.codeData.css) {
+            let preIndex = combineCode.indexOf('<style>');
+            if (preIndex !== -1) {
+              let preStr = combineCode.substr(0, preIndex + 7);
+              let footStr = combineCode.substr(preIndex + 7);
+              combineCode = preStr + this.codeData.css + footStr;
+            } else {
+              let headLoc = combineCode.indexOf('<head>');
+              if (headLoc >= 0) {
+                let preD = combineCode.substr(0, headLoc + 6);
+                let fraD = combineCode.substr(headLoc + 6);
+                combineCode = preD + `<style>${this.codeData.css}</style>` + fraD;
+              }
+            }
+            if (this.codeData.javascript) {
+              let preIndex = combineCode.indexOf('<script>');
+              if (preIndex !== -1) {
+                let preStr = combineCode.substr(0, preIndex + 8);
+                let footStr = combineCode.substr(preIndex + 8);
+                combineCode = preStr + this.codeData.javascript + footStr;
+              } else {
+                let headLoc = combineCode.indexOf('<body>');
+                if (headLoc !== -1) {
+                  let preD = combineCode.substr(0, headLoc + 6);
+                  let fraD = combineCode.substr(headLoc + 6);
+                  console.log(preD);
+                  console.log(fraD);
+                  combineCode = preD + `<script>${this.codeData.javascript}<\/script>` + fraD;      
+                }
+              }
+            }
+          }
+        }
+        console.log(combineCode);
+        this.codeConent = combineCode;
+        /*this.codeConent = `<!DOCTYPE html>
         <html>
         <head>
             <style>
@@ -60,10 +101,9 @@ import { defineComponent } from 'vue'
                 <button onclick='alert(&quot;来自iframe的问候!&quot;)'>点击测试</button>
             </div>
         </body>
-        </html>`;
+        </html>`;  */
       },
       getResultHtmlConent() {
-        return ''
       }
     }
   })

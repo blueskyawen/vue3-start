@@ -1,7 +1,7 @@
 <template>
   <div class="code-envc">
     <htmlEditor class="editor-content" @codeChange="handleCode" />
-    <htmlShow class="result-content"> :codeData="code"</htmlShow>
+    <htmlShow class="result-content" :codeData="code"></htmlShow>
   </div>
 </template>
 <script>

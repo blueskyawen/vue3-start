@@ -65,6 +65,7 @@ let myTheme = EditorView.theme({
       return {}
     },
     created() {
+      this.$emit('codeChange', this.codeData)
     },
     beforeUnmount() {
     },
@@ -89,6 +90,7 @@ let myTheme = EditorView.theme({
 </html>`;
         codeData.value.css = `p {
   font-size: 14px;
+  color: red;
 }
         `;
         codeData.value.javascript = `function test() {
@@ -181,10 +183,9 @@ let myTheme = EditorView.theme({
       }
     },
     methods: {
-      handleCodeChange() {
-        if (this.code) {
-          this.$emit('codeChange', this.codeData)
-        }
+      handleCodeChange(value) {
+        this.codeData[this.codeLang] = value
+        this.$emit('codeChange', this.codeData)
       }
     }
   })
