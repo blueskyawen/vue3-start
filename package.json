@@ -7,7 +7,7 @@
     "start": "npm run dev",
     "dev": "vite --open",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --open",
     "test:unit": "vitest",
     "prepare": "cypress install",
     "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
