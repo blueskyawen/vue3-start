@@ -23,12 +23,13 @@
         </div>
       </div>
       <div class="code-editor">
+        <a-spin class="loading-spin" v-if="!isload" size="large" />
         <codemirror
+          v-if="isload"
           class="code-emirror"
           v-model="code"
           :style="{ height: '100%', width: '100%' }"
           :extensions="extensions"
-          mode="text/javascript"
           :disabled="disableCode"
           @ready="handleReady"
           @change="log('change', $event)"
@@ -57,7 +58,10 @@
 <script>
 import { defineComponent, ref, shallowRef, nextTick, computed } from 'vue'
 import { Codemirror } from 'vue-codemirror'
+import { ayuLight, clouds, cobalt, coolGlow } from 'thememirror'
 import { javascript } from "@codemirror/lang-javascript";
+import { html } from "@codemirror/lang-html";
+import { css } from "@codemirror/lang-css";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, lineNumbers } from "@codemirror/view";
 
@@ -119,26 +123,29 @@ let myTheme = EditorView.theme({
       }
 
       disableCode.value = false
+      const isload = ref(true)
 
       const langOptions = [
         {name: 'javascript', value: javascript()},
-        {name: 'html', value: javascript()},
-        {name: 'css', value: javascript()},
+        {name: 'html', value: html()},
+        {name: 'css', value: css()},
       ]
       const langs = langOptions.map((item) => item.name)
       const codeLang = ref('javascript')
       const useCodeLand= ref(javascript())
       const handleLangChange = function(value) {
         codeLang.value = value
+        isload.value = false
+        initEditorSet(true)
       }
 
       const themeOptions = [
         {name: 'oneDark', value: oneDark},
         {name: 'light', value: myTheme},
-        {name: 'ayuLight', value: oneDark},
-        {name: 'coolGlow', value: oneDark},
-        {name: 'cobalt', value: oneDark},
-        {name: 'clouds', value: oneDark},
+        {name: 'ayuLight', value: ayuLight},
+        {name: 'coolGlow', value: coolGlow},
+        {name: 'cobalt', value: cobalt},
+        {name: 'clouds', value: clouds},
       ]
       const themes = themeOptions.map((item) => item.name)
       const codeTheme = ref('oneDark')
@@ -158,9 +165,14 @@ let myTheme = EditorView.theme({
           return findItem ? findItem.value : javascript();
         }
       }
-      const initEditorSet = function() {
+      const initEditorSet = function(reload) {
         useCodeTheme.value = getSelectOption('theme', codeTheme.value);
         useCodeLand.value = getSelectOption('lang', codeLang.value);
+        if (reload) {
+          setTimeout(() => {
+            isload.value = true
+          }, 300)
+        }
       }
       initEditorSet();
 
@@ -181,7 +193,8 @@ let myTheme = EditorView.theme({
         langs,
         themes,
         handleLangChange,
-        handleThemeChange
+        handleThemeChange,
+        isload
       }
     },
     methods: {
@@ -216,7 +229,7 @@ let myTheme = EditorView.theme({
   })
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .code-emirror :deep(.cm-editor) {
   outline: 1px dotted #212121;
 }
@@ -228,23 +241,29 @@ let myTheme = EditorView.theme({
   flex-wrap: nowrap;
   justify-content: space-between;
   height: 100%;
-}
-.code-envc .envc-content,
-.code-envc .code-result {
-  width: calc(50% - 10px);
-}
-.code-envc .envc-header {
-  display: flex;
-  justify-content: space-between;
-  align-content: center;
-  padding: 8px 0;
-}
-.code-envc .envc-header > span {
-  font-size: 16px;
-  font-weight: bold;
+  .envc-content,
+  .code-result {
+    width: calc(50% - 10px);
+  }
+  .envc-header {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    padding: 8px 0;
+    > span {
+      font-size: 16px;
+      font-weight: bold;
+    }
+  }
 }
 .envc-content .code-editor {
   height: calc(100% - 48px);
+  position: relative;
+  .loading-spin {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+  }
 }
 .code-result .code-result-content {
   height: calc(100% - 48px);
