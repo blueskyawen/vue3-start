@@ -15,7 +15,7 @@ import HelloWorld from "./components/HelloWorld.vue";
       />
       <nav>
         <RouterLink to="/codeRun">CodeEdit</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/htmlEdit">HtmlEdit</RouterLink>
       </nav>
     </a-layout-header>
     <a-layout-content style="padding: 0 50px">
