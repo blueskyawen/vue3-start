@@ -4,14 +4,14 @@
       <div class="envc-header">
         <span>代码编辑</span>
         <div>
-          <a-select
+<!--           <a-select
           ref="select"
           v-model:value="codeLang"
           style="width: 120px"
           @change="handleLangChange"
         >
           <a-select-option :value="item" v-for="item in langs" :key="item">{{ item }}</a-select-option>
-          </a-select>
+          </a-select> -->
           <a-select
             ref="select"
             v-model:value="codeTheme"
