@@ -10,7 +10,7 @@
           style="width: 120px"
           @change="handleLangChange"
         >
-          <a-select-option :value="item.value" v-for="item in langOptions" :key="item.name">{{ item.name }}</a-select-option>
+          <a-select-option :value="item" v-for="item in langs" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-select
             ref="select"
@@ -18,12 +18,13 @@
             style="width: 120px;margin-left: 10px;"
             @change="handleThemeChange"
           >
-            <a-select-option :value="item.value" v-for="item in themeOptions" :key="item.name">{{ item.name }}</a-select-option>
+            <a-select-option :value="item" v-for="item in themes" :key="item">{{ item }}</a-select-option>
           </a-select>
         </div>
       </div>
       <div class="code-editor">
         <codemirror
+          class="code-emirror"
           v-model="code"
           :style="{ height: '100%', width: '100%' }"
           :extensions="extensions"
@@ -39,16 +40,22 @@
     <div class="code-result">
       <div class="envc-header">
         <span>运行结果</span>
-        <a-button>运行</a-button>
+        <span>
+          <a-button @click="runCode">运行</a-button>
+          <a-button @click="resetRunLog" style="margin-left: 10px">重置</a-button>
+        </span>
       </div>
       <div class="code-result-content">
-        运行结果展示
+        <div v-if="resultLogs.length"> 
+          <span style="display: block;" v-for="(log, index) in resultLogs" :key="index">{{ log }}</span>
+        </div>
+        <div v-else>运行结果将显示在这里...</div>
       </div>
     </div>   
   </div>
 </template>
 <script>
-import { defineComponent, ref, shallowRef } from 'vue'
+import { defineComponent, ref, shallowRef, nextTick, computed } from 'vue'
 import { Codemirror } from 'vue-codemirror'
 import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
@@ -71,16 +78,32 @@ let myTheme = EditorView.theme({
     components: {
       Codemirror
     },
+    data() {
+      return {
+        resultLogs: [],
+        iframe1: null
+      }
+    },
+    created() {
+      this.resultLogs = []
+      this.initOriginalLog()
+      let that = this
+      console.log = function(message) { // 重写console.log方法
+        that.resultLogs.push(`>>> ${message}`); // 将日志添加到输出区域
+      }
+    },
+    beforeUnmount() {
+      this.resultLogs = [];
+    },
     setup() {
       const code = ref('')
       const disableCode = ref(true)
-      const extensions = [javascript(), lineNumbers(), oneDark];
 
       // Codemirror EditorView instance ref
       const view = shallowRef()
       const handleReady = (payload) => {
         view.value = payload.view
-        console.log('编辑器已准备好', view.value)
+        console.log('编辑器已准备好')
       }
 
       // Status is available at all times via Codemirror EditorView
@@ -102,25 +125,48 @@ let myTheme = EditorView.theme({
         {name: 'html', value: javascript()},
         {name: 'css', value: javascript()},
       ]
-      const codeLang = ref(javascript())
+      const langs = langOptions.map((item) => item.name)
+      const codeLang = ref('javascript')
+      const useCodeLand= ref(javascript())
+      const handleLangChange = function(value) {
+        codeLang.value = value
+      }
+
       const themeOptions = [
         {name: 'oneDark', value: oneDark},
+        {name: 'light', value: myTheme},
         {name: 'ayuLight', value: oneDark},
-        {name: 'smoothy', value: oneDark},
-        {name: 'nord', value: oneDark},
-        {name: 'materialDark', value: oneDark},
-        {name: 'dracula', value: oneDark},
         {name: 'coolGlow', value: oneDark},
         {name: 'cobalt', value: oneDark},
         {name: 'clouds', value: oneDark},
       ]
-      const codeTheme = ref(oneDark)
-      const handleLangChange = function(value) {
-        codeLang.value = value
-      }
+      const themes = themeOptions.map((item) => item.name)
+      const codeTheme = ref('oneDark')
+      const useCodeTheme = ref(oneDark)
+
       const handleThemeChange = function(value) {
         codeTheme.value = value
+        initEditorSet()
       }
+
+      const getSelectOption = function(type, name) {
+        if (type === 'theme') {
+          let findItem = themeOptions.find(x => x.name === name)
+          return findItem ? findItem.value : myTheme;
+        } else {
+          let findItem = langOptions.find(x => x.name === name)
+          return findItem ? findItem.value : javascript();
+        }
+      }
+      const initEditorSet = function() {
+        useCodeTheme.value = getSelectOption('theme', codeTheme.value);
+        useCodeLand.value = getSelectOption('lang', codeLang.value);
+      }
+      initEditorSet();
+
+      let extensions = computed(() => {
+        return [useCodeTheme.value, useCodeLand.value, lineNumbers()];
+      })
 
       return {
         code,
@@ -132,16 +178,51 @@ let myTheme = EditorView.theme({
         langOptions,
         codeTheme,
         themeOptions,
+        langs,
+        themes,
         handleLangChange,
         handleThemeChange
       }
     },
     methods: {
+      runCode() {
+        try {
+            const result = eval(this.code); // 使用eval执行代码，注意：eval有安全风险，仅用于示例！
+        } catch (error) {
+          this.resultLogs.push(`Error: ${error}`)
+        } finally {
+        }
+      },
+      initOriginalLog() {
+        this.iframe1 = document.createElement('iframe');
+        this.iframe1.style.display = 'none';
+        document.body.appendChild(this.iframe1);
+        window.addEventListener('beforeunload', this.resetConsoleLog);
+      },
+      resetConsoleLog(event) {
+        if (this.iframe1) {
+          const originalLog = this.iframe1.contentWindow.console;
+          console.log = originalLog.log;
+          console.log('console.log已恢复!!!')
+          window.removeEventListener('beforeunload', this.resetConsoleLog);
+          document.body.removeChild(this.iframe1);
+          this.iframe1 = null 
+        }
+      },
+      resetRunLog() {
+        this.resultLogs = []
+      }
     }
   })
 </script>
 
 <style scoped>
+.code-emirror :deep(.cm-editor) {
+  outline: 1px dotted #212121;
+}
+.code-emirror :deep(.cm-editor.cm-focus) {
+  outline: none;
+}
 .code-envc {
   display: flex;
   flex-wrap: nowrap;

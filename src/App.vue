@@ -14,7 +14,7 @@ import HelloWorld from "./components/HelloWorld.vue";
         height="38"
       />
       <nav>
-        <RouterLink to="/">Home</RouterLink>
+        <RouterLink to="/codeRun">CodeEdit</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </a-layout-header>
@@ -47,7 +47,7 @@ nav {
 }
 
 nav a.router-link-exact-active {
-  color: rgb(185, 221, 113);
+  color: rgb(127, 241, 117);
 }
 
 nav a.router-link-exact-active:hover {
@@ -59,6 +59,7 @@ nav a {
   padding: 0 1rem;
   border-left: 1px solid var(--color-border);
   color: #fff;
+  cursor: pointer;
 }
 
 nav a:first-of-type {
