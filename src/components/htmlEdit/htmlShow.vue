@@ -11,7 +11,7 @@
       <div v-if="codeData" style="height: 100%"> 
         <iframe :srcdoc="codeConent"></iframe>
       </div>
-      <div v-else>运行结果将显示在这里...</div>
+      <div v-else>w页面效果将显示在这里...</div>
     </div>
   </div>   
 </template>
@@ -42,9 +42,6 @@ import { defineComponent } from 'vue'
     methods: {
       runCode() {
         var combineCode = '';
-        console.log(this.codeData.html)
-        console.log(this.codeData.css)
-        console.log(this.codeData.javascript)
         if (this.codeData && this.codeData.html) {
           combineCode = this.codeData.html
           if (this.codeData.css) {
@@ -72,38 +69,14 @@ import { defineComponent } from 'vue'
                 if (headLoc !== -1) {
                   let preD = combineCode.substr(0, headLoc + 6);
                   let fraD = combineCode.substr(headLoc + 6);
-                  console.log(preD);
-                  console.log(fraD);
                   combineCode = preD + `<script>${this.codeData.javascript}<\/script>` + fraD;      
                 }
               }
             }
           }
         }
-        console.log(combineCode);
+        //console.log(combineCode);
         this.codeConent = combineCode;
-        /*this.codeConent = `<!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 20px;
-                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-                }
-            </style>
-        </head>
-        <body>
-            <h1>这是直接嵌入的HTML</h1>
-            <div class='content'>
-                <p>这个内容是通过 <span class='highlight'>srcdoc</span> 属性直接嵌入到iframe中的HTML代码。</p>
-                <button onclick='alert(&quot;来自iframe的问候!&quot;)'>点击测试</button>
-            </div>
-        </body>
-        </html>`;  */
-      },
-      getResultHtmlConent() {
       }
     }
   })
