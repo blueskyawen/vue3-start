@@ -43,6 +43,7 @@ import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, lineNumbers } from "@codemirror/view";
+import { useStartStore } from "@/stores/counter.js";
 
 let myTheme = EditorView.theme({
   "&": { color: "#0052D9", backgroundColor: "#FFFFFF" },
@@ -70,6 +71,7 @@ let myTheme = EditorView.theme({
     beforeUnmount() {
     },
     setup() {
+      const runStore = useStartStore();
       const code = ref('')
       const codeData = ref({
         html: '',
@@ -104,14 +106,19 @@ let myTheme = EditorView.theme({
         console.log('编辑器已准备好')
       }
 
+      const getSelectOption = function(type, name, options) {
+        let findItem = options.find(x => x.name === name)
+        return findItem ? findItem.value : type === 'theme' ? myTheme : javascript();
+      }
+
       const isload = ref(true)
       const langOptions = [
         {name: 'javascript', value: javascript()},
         {name: 'html', value: html()},
         {name: 'css', value: css()},
       ]
-      const codeLang = ref('html')
-      const useCodeLand= ref(html())
+      const codeLang = ref(runStore.htmlRunState.lang || 'html')
+      const useCodeLand= ref(getSelectOption('lang', codeLang.value, langOptions))
 
       const setCurLang = function() {
         if (['html', 'css', 'javascript'].includes(codeLang.value)) {
@@ -123,6 +130,7 @@ let myTheme = EditorView.theme({
         codeLang.value = value
         setCurLang();
         isload.value = false
+        runStore.setHtmlRunState({ theme: codeTheme.value, lang:  codeLang.value});
         initEditorSet(true)
       }
 
@@ -135,26 +143,18 @@ let myTheme = EditorView.theme({
         {name: 'clouds', value: clouds},
       ]
       const themes = themeOptions.map((item) => item.name)
-      const codeTheme = ref('oneDark')
-      const useCodeTheme = ref(oneDark)
+      const codeTheme = ref(runStore.htmlRunState.theme || 'oneDark')
+      const useCodeTheme = ref(getSelectOption('theme', codeTheme.value, themeOptions))
 
       const handleThemeChange = function(value) {
         codeTheme.value = value
+        runStore.setHtmlRunState({ theme: codeTheme.value, lang:  codeLang.value});
         initEditorSet()
       }
 
-      const getSelectOption = function(type, name) {
-        if (type === 'theme') {
-          let findItem = themeOptions.find(x => x.name === name)
-          return findItem ? findItem.value : myTheme;
-        } else {
-          let findItem = langOptions.find(x => x.name === name)
-          return findItem ? findItem.value : html();
-        }
-      }
       const initEditorSet = function(reload) {
-        useCodeTheme.value = getSelectOption('theme', codeTheme.value);
-        useCodeLand.value = getSelectOption('lang', codeLang.value);
+        useCodeTheme.value = getSelectOption('theme', codeTheme.value, themeOptions);
+        useCodeLand.value = getSelectOption('lang', codeLang.value, langOptions);
         if (reload) {
           setTimeout(() => {
             isload.value = true

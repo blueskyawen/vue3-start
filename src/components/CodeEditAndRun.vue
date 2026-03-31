@@ -64,6 +64,7 @@ import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, lineNumbers } from "@codemirror/view";
+import { useStartStore } from "@/stores/counter.js";
 
 let myTheme = EditorView.theme({
   "&": { color: "#0052D9", backgroundColor: "#FFFFFF" },
@@ -122,6 +123,13 @@ let myTheme = EditorView.theme({
         // return ...
       }
 
+      const getSelectOption = function(type, name, options) {
+        let findItem = options.find(x => x.name === name)
+        return findItem ? findItem.value : type === 'theme' ? myTheme : javascript();
+      }
+
+      const runStore = useStartStore();
+
       disableCode.value = false
       const isload = ref(true)
 
@@ -131,11 +139,12 @@ let myTheme = EditorView.theme({
         {name: 'css', value: css()},
       ]
       const langs = langOptions.map((item) => item.name)
-      const codeLang = ref('javascript')
-      const useCodeLand= ref(javascript())
+      const codeLang = ref(runStore.jsRunState.lang || 'javascript')
+      const useCodeLand= ref(getSelectOption('lang', codeLang.value, langOptions))
       const handleLangChange = function(value) {
         codeLang.value = value
         isload.value = false
+        runStore.setJsRunState({ theme: codeTheme.value, lang:  codeLang.value});
         initEditorSet(true)
       }
 
@@ -148,26 +157,18 @@ let myTheme = EditorView.theme({
         {name: 'clouds', value: clouds},
       ]
       const themes = themeOptions.map((item) => item.name)
-      const codeTheme = ref('oneDark')
-      const useCodeTheme = ref(oneDark)
+      const codeTheme = ref(runStore.jsRunState.theme || 'oneDark')
+      const useCodeTheme = ref(getSelectOption('theme', codeTheme.value, themeOptions))
 
       const handleThemeChange = function(value) {
         codeTheme.value = value
+        runStore.setJsRunState({ theme: codeTheme.value, lang:  codeLang.value});
         initEditorSet()
       }
 
-      const getSelectOption = function(type, name) {
-        if (type === 'theme') {
-          let findItem = themeOptions.find(x => x.name === name)
-          return findItem ? findItem.value : myTheme;
-        } else {
-          let findItem = langOptions.find(x => x.name === name)
-          return findItem ? findItem.value : javascript();
-        }
-      }
       const initEditorSet = function(reload) {
-        useCodeTheme.value = getSelectOption('theme', codeTheme.value);
-        useCodeLand.value = getSelectOption('lang', codeLang.value);
+        useCodeTheme.value = getSelectOption('theme', codeTheme.value, themeOptions);
+        useCodeLand.value = getSelectOption('lang', codeLang.value, langOptions);
         if (reload) {
           setTimeout(() => {
             isload.value = true
@@ -179,6 +180,7 @@ let myTheme = EditorView.theme({
       let extensions = computed(() => {
         return [useCodeTheme.value, useCodeLand.value, lineNumbers()];
       })
+
 
       return {
         code,
@@ -194,7 +196,8 @@ let myTheme = EditorView.theme({
         themes,
         handleLangChange,
         handleThemeChange,
-        isload
+        isload,
+        getSelectOption
       }
     },
     methods: {
